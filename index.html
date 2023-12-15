@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,116 +6,73 @@
     <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <title>Dental Taper Angle and Symmetry Checker</title>
     <style>
-        body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
-#container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-label {
-    background-color: #3498db;
-    color: #fff;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-bottom: 10px;
-}
-
-label:hover {
-    background-color: #2980b9;
-}
-
-button {
-    background-color: #e74c3c;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-left: 10px;
-}
-
-button:hover {
-    background-color: #c0392b;
-}
-
-#result-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 20px;
-}
-
-#result {
-    font-size: 18px;
-    color: #333;
-    background-color: #ecf0f1;
-    padding: 15px;
-    border-radius: 5px;
-    box-sizing: border-box;
-    overflow-wrap: break-word;
-    white-space: pre-wrap;
-    max-width: 400px; /* Set a max-width for better readability */
-    margin-left: 10px; /* Add margin for separation */
-}
-
-#canvas-container {
-    display: flex;
-    flex-direction: row;
-    margin-top: 20px;
-}
-
-canvas {
-    border: 2px solid #333;
-    border-radius: 5px;
-    margin-right: 10px; /* Add margin for separation */
-}
-
-@media (max-width: 600px) {
-    #canvas-container {
-        flex-direction: column;
-    }
-
-    canvas {
-        margin-right: 0;
-        margin-bottom: 10px; /* Add margin for separation in column layout */
-    }
-}
-
+        .container {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #3498db;
+            text-align: center;
+            background-color: #ecf0f1;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    
+        #result-container {
+            margin-top: 10px;
+        }
+    
+        .canvas-container {
+            margin-top: 10px;
+            position: relative;
+        }
+    
+        canvas {
+            border: 1px solid #3498db;
+            cursor: pointer;
+            background-color: #fff;
+        }
+    
+        input[type="file"],
+        button {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    
+        input[type="file"] {
+            display: none;
+        }
+    
+        label {
+            display: inline-block;
+            padding: 8px;
+            background-color: #2ecc71;
+            color: #fff;
+            cursor: pointer;
+        }
     </style>
+    
+    
 </head>
 
 <body>
-    <div id="container">
+    <div class="container">
         <input type="file" id="imageInput" accept="image/*" onchange="processImage()">
         <label for="imageInput">Upload Image</label>
         <button onclick="resetImage()">Reset</button>
+    </div>
+    <div class="container">
         <div id="result-container">
             <div id="result"></div>
         </div>
-        <div id="canvas-container">
+    </div>
+    <div class="container">
+        <div class="canvas-container">
             <canvas id="originalCanvas"></canvas>
             <canvas id="canvas" onclick="handleCanvasClick(event)"></canvas>
         </div>
-    </div>	
+    </div>
     <script>
         let isOpencvReady = false;
         let originalImage;
@@ -290,8 +246,8 @@ canvas {
             }
         }
 
-        
-	function calculateAndDisplayTaperAngles() {
+
+        function calculateAndDisplayTaperAngles() {
             const resultElement = document.getElementById('result');
             if (points.length < 4) {
                 resultElement.textContent = "Please click on four points to define the lines.";
@@ -312,7 +268,7 @@ canvas {
             const taperAngleRad2 = Math.atan(deltaY2 / deltaX);
             const taperAngleDeg2 = 90 - (taperAngleRad2 * 180) / Math.PI;
 
-        
+
             // Draw the lines on the canvas
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
@@ -350,11 +306,11 @@ canvas {
             resultElement.textContent = `The dental taper angle left is: ${taperAngleDeg.toFixed(2)} degrees`;
             resultElement.textContent += `\t The dental taper angle right is: ${taperAngleDeg2.toFixed(2)} degrees`;
             resultElement.textContent += `\n Sum of angles : ${sumOfFirstAndLastAngles.toFixed(2)} degrees`;
-	   
+
             evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
 
-	function evaluateSumOfAngles(sumOfAngles) {
+        function evaluateSumOfAngles(sumOfAngles) {
             const resultElement = document.getElementById('result');
             if (sumOfAngles >= 6 && sumOfAngles <= 16) {
                 resultElement.textContent += '\nPerfect taper.';
