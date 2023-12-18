@@ -80,6 +80,9 @@
             margin-top: 20px;
             cursor: pointer;
         }
+        #nextButton{
+            display: none;
+        }
     </style>
 </head>
 
@@ -89,6 +92,7 @@
         <div id="buttons-container" class="d-flex justify-content-between">
             <label for="imageInput" class="btn btn-primary">Upload Image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
+            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Next</button>
             <button onclick="resetImage()" class="btn btn-danger">Reset</button>
         </div>
     </div>
@@ -111,6 +115,8 @@
         let angles = [];
         let imgElement;
         let linesDrawn = false;
+        let storPoints = [];
+        let storAngles = [];
 
         function onOpenCvReady() {
             isOpencvReady = true;
@@ -246,15 +252,15 @@
 
                 // Check if the point is in the upper half of the canvas
                 //if (point.y < dilated.rows / 2) {
-                    // Increase the size of the points
-                    cv.circle(dilated, point, 2, color, -1);
+                // Increase the size of the points
+                cv.circle(dilated, point, 2, color, -1);
 
-                    // Display coordinates next to the point
-                    //const text = `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
-                    //cv.putText(dilated, text, new cv.Point(point.x + 10, point.y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv.LINE_AA);
+                // Display coordinates next to the point
+                //const text = `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
+                //cv.putText(dilated, text, new cv.Point(point.x + 10, point.y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv.LINE_AA);
 
-                    // Store coordinates in the array
-                    cornerCoordinates.push({ x: point.x, y: point.y });
+                // Store coordinates in the array
+                cornerCoordinates.push({ x: point.x, y: point.y });
                 //}
             }
 
@@ -364,6 +370,22 @@
             context.clearRect(0, 0, canvas.width, canvas.height);
             resetCanvasFromOriginal();
             loadImageAndProcess();
+            const resultElement = document.getElementById('result-container');
+            resultElement.textContent = "";
+            hideNextButtonIfEmpty();
+        }
+
+
+        function nextAngles() {
+            storPoints = points;
+            storAngles = angles;
+            points = [];
+            angles = [];
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            resetCanvasFromOriginal();
+            loadImageAndProcess();
             const resultElement = document.getElementById('resultContainer');
             resultElement.textContent = "";
         }
@@ -416,8 +438,11 @@
             //context.fillText(`(${closestPoint.x.toFixed(2)}, ${closestPoint.y.toFixed(2)})`, closestPoint.x + 10, closestPoint.y - 10);
 
             if (points.length === 4) {
+                // Appeler la fonction au chargement de la page ou à tout autre moment nécessaire
+                hideNextButtonIfEmpty();
                 calculateAndDisplayTaperAngles();
                 checkSymmetry();
+                
             }
         }
 
@@ -432,12 +457,12 @@
             const deltaY = points[1].y - points[0].y;
             const deltaX = points[1].x - points[0].x;
             const taperAngleRad = Math.atan2(deltaY, deltaX);
-            const taperAngleDeg = Math.abs(90 + (taperAngleRad * 180) / Math.PI);
+            const taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
 
             const deltaY2 = points[3].y - points[2].y;
             const deltaX2 = points[3].x - points[2].x;
             const taperAngleRad2 = Math.atan2(deltaY2, deltaX2);
-            const taperAngleDeg2 = Math.abs(90 + (taperAngleRad2 * 180) / Math.PI);
+            const taperAngleDeg2 = -((taperAngleRad2 * 180) / Math.PI) - 90;
 
             // Calculer les coordonnées du point d'intersection
             const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
@@ -626,6 +651,26 @@
 
             return '\nSymmetry: ' + (isSymmetrical ? "Symmetrical" : "Not Symmetrical");
         }
+
+
+        //Bouton next  
+
+        // Vérifie si le tableau storPoints est vide
+        function isStorPointsEmpty() {
+            return points.length === 0;
+        }
+
+        // Fonction pour cacher le bouton si le tableau est vide
+        function hideNextButtonIfEmpty() {
+            var nextButton = document.getElementById("nextButton");
+            if (isStorPointsEmpty()) {
+                nextButton.style.display = "none";  // Cache le bouton
+            } else {
+                nextButton.style.display = "inline-block";  // Affiche le bouton
+            }
+        }
+
+        
     </script>
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
