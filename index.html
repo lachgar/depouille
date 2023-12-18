@@ -1,78 +1,109 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();"
+        type="text/javascript"></script>
     <title>Dental Taper Angle and Symmetry Checker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
         .container {
-            margin: 10px;
-            padding: 10px;
-            border: 1px solid #3498db;
+            margin-top: 30px;
+        }
+
+        .page-title {
             text-align: center;
-            background-color: #ecf0f1;
-            font-family: Arial, Helvetica, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #3498db;
         }
-    
-        #result-container {
-            margin-top: 10px;
+
+        #buttons-container {
+            display: flex;
+            justify-content: space-between;
         }
-    
+
+        #resultContainer {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        #resultContainer p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
         .canvas-container {
-            margin-top: 10px;
+            margin-top: 20px;
             position: relative;
         }
-    
+
         canvas {
             border: 1px solid #3498db;
             cursor: pointer;
             background-color: #fff;
         }
-    
+
+        .green-text {
+            color: green;
+        }
+
+        .orange-text {
+            color: orange;
+        }
+
+        .red-text {
+            color: red;
+        }
+
         input[type="file"],
         button {
-            margin-top: 10px;
-            padding: 8px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
+            margin-top: 20px;
             cursor: pointer;
         }
-    
-        input[type="file"] {
-            display: none;
-        }
-    
+
         label {
             display: inline-block;
-            padding: 8px;
-            background-color: #2ecc71;
-            color: #fff;
+            margin-top: 20px;
             cursor: pointer;
         }
     </style>
-    
-    
 </head>
 
 <body>
     <div class="container">
-        <input type="file" id="imageInput" accept="image/*" onchange="processImage()">
-        <label for="imageInput">Upload Image</label>
-        <button onclick="resetImage()">Reset</button>
+        <h1 class="page-title">Dental Taper Angle and Symmetry Checker</h1>
+        <div id="buttons-container" class="d-flex justify-content-between">
+            <label for="imageInput" class="btn btn-primary">Upload Image</label>
+            <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
+            <button onclick="resetImage()" class="btn btn-danger">Reset</button>
+        </div>
     </div>
     <div class="container">
         <div id="result-container">
-            <div id="result"></div>
+            <div id="resultContainer"></div>
         </div>
     </div>
     <div class="container">
         <div class="canvas-container">
-            <canvas id="originalCanvas"></canvas>
-            <canvas id="canvas" onclick="handleCanvasClick(event)"></canvas>
+            <canvas id="originalCanvas" class="border"></canvas>
+            <canvas id="canvas" onclick="handleCanvasClick(event)" class="border"></canvas>
         </div>
     </div>
+
     <script>
         let isOpencvReady = false;
         let originalImage;
@@ -96,15 +127,15 @@
 
             // Apply Gaussian blur
             const blurred = new cv.Mat();
-            cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
+            cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 1);
 
             // Apply Canny edge detection
             cv.Canny(blurred, edges, 50, 150);
 
             // Dilate the image to connect components
             const dilated = new cv.Mat();
-            const dilateSize = 3;
-            const dilateKernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(dilateSize, dilateSize));
+            const dilateSize = 1;
+            const dilateKernel = cv.getStructuringElement(cv.MORPH_CROSS, new cv.Size(dilateSize, dilateSize));
             cv.dilate(edges, dilated, dilateKernel);
 
             // Use Hough transform to detect lines
@@ -117,6 +148,10 @@
             originalCanvas.height = imgElement.height;
             contextOriginal.drawImage(imgElement, 0, 0, originalCanvas.width, originalCanvas.height);
 
+            // Highlight the corners on the pre-processed image
+            highlightCorners(originalImage, dilated);
+
+
             // Display the pre-processed image
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
@@ -124,8 +159,18 @@
             canvas.height = imgElement.height;
             cv.imshow(canvas, dilated);
 
-            // Highlight the corners
-            highlightCorners(originalImage, dilated);
+            // Highlight the corners on the pre-processed image
+            highlightCorners2(canvas, dilated);
+
+            // Add click event listener to the canvas
+            canvas.addEventListener('click', function (event) {
+                // Get the mouse coordinates relative to the canvas
+                const x = event.offsetX;
+                const y = event.offsetY;
+
+                // Check if the clicked point is on a line
+                checkIfPointOnLine(x, y, lines);
+            });
 
             // Process the detected lines
             angles = [];
@@ -138,6 +183,11 @@
                 angles.push(angleDeg);
             }
 
+            // Print each angle in the angles array
+            angles.forEach((angle) => {
+                console.log(angle);
+            });
+
             // Clean up
             gray.delete();
             blurred.delete();
@@ -145,6 +195,120 @@
             dilated.delete();
             dilateKernel.delete();
             lines.delete();
+        }
+
+        // Global array to store corner coordinates
+        const cornerCoordinates = [];
+
+        // Function to calculate Euclidean distance between two points
+        function calculateDistance(point1, point2) {
+            return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+        }
+
+        // Draw lines connecting corners based on proximity
+        function drawLinesBasedOnProximity(canvas, dilated, proximityThreshold) {
+            const lineColor = [0, 0, 255, 255]; // Blue color for lines
+
+            // Draw lines connecting corners based on proximity
+            for (let i = 0; i < cornerCoordinates.length - 1; ++i) {
+                const start = cornerCoordinates[i];
+                const end = cornerCoordinates[i + 1];
+
+                // Calculate the distance between consecutive corners
+                const distance = calculateDistance(start, end);
+
+                // Draw a line only if the distance is below the threshold
+                if (distance < proximityThreshold) {
+                    cv.line(dilated, new cv.Point(start.x, start.y), new cv.Point(end.x, end.y), lineColor, 2);
+                }
+            }
+
+            cv.imshow(canvas, dilated);
+        }
+
+        // Function to highlight corners on the pre-processed image
+        function highlightCorners2(canvas, dilated) {
+            const corners = new cv.Mat();
+            cv.goodFeaturesToTrack(dilated, corners, 0, 0.001, 10);
+
+            const color = [255, 0, 0, 255]; // Red color for corners
+
+            // Check if corners were detected
+            if (corners.rows <= 0) {
+                console.error('No corners detected.');
+                return;
+            }
+
+            for (let i = 0; i < corners.rows; ++i) {
+                const point = new cv.Point(corners.data32F[i * 2], corners.data32F[i * 2 + 1]);
+
+                // Check if the point is in the upper half of the canvas
+                if (point.y < dilated.rows / 2) {
+                    // Increase the size of the points
+                    cv.circle(dilated, point, 2, color, -1);
+
+                    // Display coordinates next to the point
+                    //const text = `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
+                    //cv.putText(dilated, text, new cv.Point(point.x + 10, point.y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv.LINE_AA);
+
+                    // Store coordinates in the array
+                    cornerCoordinates.push({ x: point.x, y: point.y });
+                }
+            }
+
+            // Draw lines based on proximity
+            const proximityThreshold = 30; // Adjust the threshold as needed
+            // drawLinesBasedOnProximity(canvas, dilated, proximityThreshold);
+
+            cv.imshow(canvas, dilated);
+            //printCornerCoordinates();
+            corners.delete();
+        }
+
+        // Example usage
+        //highlightCorners2(canvas, dilated);
+
+
+        // Example usage of cornerCoordinates array
+        function printCornerCoordinates() {
+            cornerCoordinates.forEach((coord, index) => {
+                console.log(`Corner ${index + 1}: (${coord.x}, ${coord.y})`);
+            });
+        }
+
+
+        function drawPoint(context, point, radius, color) {
+            context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
+            context.beginPath();
+            context.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+            context.fill();
+        }
+
+
+        // Function to check if a point is on a line
+        function checkIfPointOnLine(x, y, lines) {
+            for (let i = 0; i < lines.rows; ++i) {
+                const rho = lines.data32F[i * 2];
+                const theta = lines.data32F[i * 2 + 1];
+                const a = Math.cos(theta);
+                const b = Math.sin(theta);
+                const x0 = a * rho;
+                const y0 = b * rho;
+                const x1 = x0 + 1000 * (-b);
+                const y1 = y0 + 1000 * (a);
+                const x2 = x0 - 1000 * (-b);
+                const y2 = y0 - 1000 * (a);
+
+                // Calculate the distance from the point to the line
+                const distance = Math.abs((x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1)) /
+                    Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+                // If the distance is within a threshold, consider it a click on the line
+                if (distance < 2) {
+                    console.log('Clicked on line:', i);
+                    // Perform any additional actions you want when a line is clicked
+                }
+            }
         }
 
         function imgElementOnLoad() {
@@ -192,7 +356,7 @@
             context.clearRect(0, 0, canvas.width, canvas.height);
             resetCanvasFromOriginal();
             loadImageAndProcess();
-            const resultElement = document.getElementById('result');
+            const resultElement = document.getElementById('resultContainer');
             resultElement.textContent = "";
         }
 
@@ -202,7 +366,7 @@
 
             for (let i = 0; i < corners.rows; ++i) {
                 const point = new cv.Point(corners.data32F[i * 2], corners.data32F[i * 2 + 1]);
-                cv.circle(src, point, 5, [0, 255, 0, 255], -1); // Highlight corners in green
+                cv.circle(src, point, 1, [0, 255, 0, 255], -1); // Highlight corners in green
             }
 
             cv.imshow('originalCanvas', src);
@@ -216,14 +380,32 @@
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            points.push({ x, y });
+            // Find the closest point considering both x and y axes
+            let closestPoint = null;
+            let minDistance = Number.MAX_VALUE;
 
+            for (const point of cornerCoordinates) {
+                const distance = Math.sqrt(Math.pow(point.x - x, 2) + Math.pow(point.y - y, 2));
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPoint = point;
+                }
+            }
+            points.push({ x: closestPoint.x, y: closestPoint.y });
             // Draw a point on the canvas
             const context = canvas.getContext('2d');
-            context.fillStyle = 'red';
-            context.beginPath();
-            context.arc(x, y, 5, 0, 2 * Math.PI);
-            context.fill();
+            if (points.length <= 4) {
+                context.fillStyle = 'red';
+                context.beginPath();
+                context.arc(closestPoint.x, closestPoint.y, 5, 0, 2 * Math.PI);
+                context.fill();
+            }
+
+            // Display coordinates on the canvas
+            context.fillStyle = 'yellow';
+            context.font = '12px Arial';
+            //context.fillText(`(${closestPoint.x.toFixed(2)}, ${closestPoint.y.toFixed(2)})`, closestPoint.x + 10, closestPoint.y - 10);
 
             if (points.length === 4) {
                 calculateAndDisplayTaperAngles();
@@ -231,68 +413,60 @@
             }
         }
 
-        function evaluateSymmetry() {
-            const resultElement = document.getElementById('result');
-            const threshold = 5;
-
-            const leftTaperAngle = angles[0];
-            const rightTaperAngle = angles[1];
-
-            const angleDifference = Math.abs(leftTaperAngle - rightTaperAngle);
-            if (angleDifference > threshold) {
-                resultElement.textContent += `\nPossible asymmetry detected. Angle difference: ${angleDifference.toFixed(2)}`;
-            } else {
-                resultElement.textContent += '\nSymmetrical taper detected.';
-            }
-        }
-
-
         function calculateAndDisplayTaperAngles() {
-            const resultElement = document.getElementById('result');
+            const resultElement = document.getElementById('resultContainer');
             if (points.length < 4) {
                 resultElement.textContent = "Please click on four points to define the lines.";
                 return;
             }
 
             // Calculate distances for taper angle
-            const deltaY = Math.abs(points[0].y - points[1].y);
-            const deltaX = Math.abs(points[0].x - points[1].x);
-            const L = Math.hypot(deltaY, deltaX);
+            const deltaY = points[1].y - points[0].y;
+            const deltaX = points[1].x - points[0].x;
+            const taperAngleRad = Math.atan2(deltaY, deltaX);
+            const taperAngleDeg = Math.abs(90 + (taperAngleRad * 180) / Math.PI);
 
-            // Calculate the taper angle relative to horizontal in degrees
-            const taperAngleRad = Math.atan(deltaY / deltaX);
-            const taperAngleDeg = 90 - (taperAngleRad * 180) / Math.PI;
-
-            // Calculate the angle on the other side relative to vertical in degrees
-            const deltaY2 = Math.abs(points[2].y - points[3].y);
-            const taperAngleRad2 = Math.atan(deltaY2 / deltaX);
-            const taperAngleDeg2 = 90 - (taperAngleRad2 * 180) / Math.PI;
-
+            const deltaY2 = points[3].y - points[2].y;
+            const deltaX2 = points[3].x - points[2].x;
+            const taperAngleRad2 = Math.atan2(deltaY2, deltaX2);
+            const taperAngleDeg2 = Math.abs(90 + (taperAngleRad2 * 180) / Math.PI);
 
             // Draw the lines on the canvas
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
 
-            //context.clearRect(0, 0, canvas.width, canvas.height);
+            // Calculer les coordonnées du point d'intersection
+            const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
+            const yIntercept1 = points[0].y - slope1 * points[0].x;
 
-            context.strokeStyle = 'red';
+            const slope2 = (points[3].y - points[2].y) / (points[3].x - points[2].x);
+            const yIntercept2 = points[2].y - slope2 * points[2].x;
+
+            const intersectionX = (yIntercept2 - yIntercept1) / (slope1 - slope2);
+            const intersectionY = slope1 * intersectionX + yIntercept1;
+
+            // Dessiner les lignes jusqu'au point d'intersection
+
+
+            context.strokeStyle = 'green';
             context.lineWidth = 2;
 
             context.beginPath();
             context.moveTo(points[0].x, points[0].y);
-            context.lineTo(points[1].x, points[1].y);
+            context.lineTo(intersectionX, intersectionY);
             context.stroke();
 
             context.beginPath();
             context.moveTo(points[2].x, points[2].y);
-            context.lineTo(points[3].x, points[3].y);
+            context.lineTo(intersectionX, intersectionY);
             context.stroke();
+
 
             // Draw the angle text
             const centerX = (points[0].x + points[1].x) / 2;
             const centerY = (points[0].y + points[1].y) / 2;
 
-            context.fillStyle = 'blue';
+            context.fillStyle = 'yellow';
             context.font = '14px Arial';
             context.fillText(` ${taperAngleDeg.toFixed(2)} °`, centerX - 40, centerY - 20);
 
@@ -302,16 +476,52 @@
             context.fillText(`${taperAngleDeg2.toFixed(2)} °`, centerX2 - 40, centerY2 - 20);
 
             const sumOfFirstAndLastAngles = taperAngleDeg + taperAngleDeg2;
-            // Display the results
-            resultElement.textContent = `The dental taper angle left is: ${taperAngleDeg.toFixed(2)} degrees`;
-            resultElement.textContent += `\t The dental taper angle right is: ${taperAngleDeg2.toFixed(2)} degrees`;
-            resultElement.textContent += `\n Sum of angles : ${sumOfFirstAndLastAngles.toFixed(2)} degrees`;
 
+            // Display the results
+
+            // Adjust color based on the criteria
+            // Set default class to 'green-text'
+            let className = 'green-text';
+
+            // Adjust class based on the criteria
+            if (sumOfFirstAndLastAngles > 16 && sumOfFirstAndLastAngles <= 21) {
+                className = 'orange-text';
+            } else if (sumOfFirstAndLastAngles > 21 || (sumOfFirstAndLastAngles >= 4 && sumOfFirstAndLastAngles < 6) || sumOfFirstAndLastAngles < 4) {
+                className = 'red-text';
+            }
+
+            // Display the results with the dynamically determined class
+            const resultHtml = `<p class="${className}">The dental taper angle left is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+            <p class="${className}">The dental taper angle right is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+            <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>`;
+            resultContainer.innerHTML = resultHtml;
             evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
 
+
+        function drawTangentLine(point, angleRad, color, isOutside) {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            const length = 50;
+            const direction = isOutside ? 1 : -1;
+
+            // Calculer les coordonnées de l'autre extrémité de la ligne
+            const endX = point.x + direction * length * Math.cos(angleRad);
+            const endY = point.y + direction * length * Math.sin(angleRad);
+
+            // Dessiner la ligne
+            context.strokeStyle = color;
+            context.lineWidth = 5;
+            context.beginPath();
+            context.moveTo(point.x, point.y);
+            context.lineTo(endX, endY);
+            context.stroke();
+        }
+
+
         function evaluateSumOfAngles(sumOfAngles) {
-            const resultElement = document.getElementById('result');
+            const resultElement = document.getElementById('resultContainer');
             if (sumOfAngles >= 6 && sumOfAngles <= 16) {
                 resultElement.textContent += '\nPerfect taper.';
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
@@ -322,25 +532,10 @@
         }
 
 
-        function drawTangentLine(point, angleRad, color, isOutside) {
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
 
-            const length = 50;
-            const direction = isOutside ? 1 : -1;
-            const endX = point.x + direction * length * Math.cos(angleRad);
-            const endY = point.y + direction * length * Math.sin(angleRad);
-
-            context.strokeStyle = color;
-            context.lineWidth = 5;
-            context.beginPath();
-            context.moveTo(point.x, point.y);
-            context.lineTo(endX, endY);
-            context.stroke();
-        }
 
         function evaluateSumOfAngles(sumOfAngles) {
-            const resultElement = document.getElementById('result');
+            const resultElement = document.getElementById('resultContainer');
             if (sumOfAngles >= 6 && sumOfAngles <= 16) {
                 resultElement.textContent += '\nPerfect taper.';
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
@@ -351,7 +546,7 @@
         }
 
         function checkSymmetry() {
-            const resultElement = document.getElementById('result');
+            const resultElement = document.getElementById('resultContainer');
             const deltaX1 = Math.abs(points[0].x - points[1].x);
             const deltaX2 = Math.abs(points[2].x - points[3].x);
             const deltaY1 = Math.abs(points[0].y - points[1].y);
@@ -362,6 +557,17 @@
             resultElement.textContent += `\nSymmetry: ${isSymmetrical ? "Symmetrical" : "Not Symmetrical"}`;
         }
     </script>
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-gzFDBJ0d6bl/2bMqz4EMfRr4Bd1zwoQe8b1BM6UE5zHjU9cRaxUIjtJ2Ib59iSpD"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
 </body>
 
 </html>

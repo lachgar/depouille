@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <title>Harris Corner Detector</title>
+</head>
+<body>
+    <input type="file" id="fileInput" />
+    <canvas id="outputCanvas"></canvas>
+
+    <script type="text/javascript">
+        function onOpenCvReady() {
+            document.getElementById('fileInput').addEventListener('change', function (e) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var src = cv.imread('outputCanvas');
+                    var gray = new cv.Mat();
+                    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+
+                    // Appliquer le détecteur de Harris
+                    var dst = new cv.Mat();
+                    cv.cornerHarris(gray, dst, 2, 3, 0.04);
+
+                    // Dilater les coins pour les rendre plus visibles
+                    cv.dilate(dst, dst, new cv.Mat());
+
+                    // Marquer les coins sur l'image d'origine
+                    var corners = new cv.Mat();
+                    cv.threshold(dst, corners, 0.01 * dst.max(), 255, cv.THRESH_BINARY);
+                    cv.cvtColor(corners, corners, cv.COLOR_GRAY2RGBA);
+                    cv.bitwise_or(src, corners, src);
+
+                    // Afficher le résultat
+                    cv.imshow('outputCanvas', src);
+
+                    // Libérer la mémoire
+                    src.delete();
+                    gray.delete();
+                    dst.delete();
+                    corners.delete();
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            });
+        }
+    </script>
+</body>
+</html>
