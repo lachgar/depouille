@@ -127,8 +127,9 @@
 
             // Apply Gaussian blur
             const blurred = new cv.Mat();
-            cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 1);
-
+            //cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 1);
+            cv.GaussianBlur(originalImage, blurred, new cv.Size(0, 0), 2);
+            cv.addWeighted(originalImage, 1.5, blurred, -0.5, 0, originalImage);
             // Apply Canny edge detection
             cv.Canny(blurred, edges, 50, 150);
 
@@ -414,9 +415,9 @@
         }
 
         function calculateAndDisplayTaperAngles() {
-            const resultElement = document.getElementById('resultContainer');
+            const resultContainer = document.getElementById('result-container');
             if (points.length < 4) {
-                resultElement.textContent = "Please click on four points to define the lines.";
+                resultContainer.textContent = "Please click on four points to define the lines.";
                 return;
             }
 
@@ -431,10 +432,6 @@
             const taperAngleRad2 = Math.atan2(deltaY2, deltaX2);
             const taperAngleDeg2 = Math.abs(90 + (taperAngleRad2 * 180) / Math.PI);
 
-            // Draw the lines on the canvas
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-
             // Calculer les coordonnées du point d'intersection
             const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
             const yIntercept1 = points[0].y - slope1 * points[0].x;
@@ -445,9 +442,25 @@
             const intersectionX = (yIntercept2 - yIntercept1) / (slope1 - slope2);
             const intersectionY = slope1 * intersectionX + yIntercept1;
 
+
+            const line1 = {
+                startX: points[0].x,
+                startY: points[0].y,
+                endX: intersectionX,
+                endY: intersectionY
+            };
+
+            const line2 = {
+                startX: points[2].x,
+                startY: points[2].y,
+                endX: intersectionX,
+                endY: intersectionY
+            };
+            // Draw the lines on the canvas
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
             // Dessiner les lignes jusqu'au point d'intersection
-
-
             context.strokeStyle = 'green';
             context.lineWidth = 2;
 
@@ -460,7 +473,6 @@
             context.moveTo(points[2].x, points[2].y);
             context.lineTo(intersectionX, intersectionY);
             context.stroke();
-
 
             // Draw the angle text
             const centerX = (points[0].x + points[1].x) / 2;
@@ -475,10 +487,19 @@
 
             context.fillText(`${taperAngleDeg2.toFixed(2)} °`, centerX2 - 40, centerY2 - 20);
 
+            // Calculer l'angle entre les deux lignes
+            const angleBetweenLines = calculateAngleBetweenLines(line1, line2);
+
+            // Afficher le texte de l'angle entre les deux lignes
+            const centerX3 = (intersectionX + centerX2) / 2;
+            const centerY3 = (intersectionY + centerY2) / 2;
+
+            context.fillStyle = 'blue';
+            context.fillText(`Convergence Angle: ${angleBetweenLines.toFixed(2)} °`, centerX3 - 40, centerY3 + 20);
+
             const sumOfFirstAndLastAngles = taperAngleDeg + taperAngleDeg2;
 
             // Display the results
-
             // Adjust color based on the criteria
             // Set default class to 'green-text'
             let className = 'green-text';
@@ -491,12 +512,53 @@
             }
 
             // Display the results with the dynamically determined class
-            const resultHtml = `<p class="${className}">The dental taper angle left is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
-            <p class="${className}">The dental taper angle right is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
-            <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>`;
+            const resultHtml = `<p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+                <p class="${className}">The second dental taper angle right is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+                <p class="${className}">Angle between lines: <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
+                <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>`;
             resultContainer.innerHTML = resultHtml;
             evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
+
+        // Modifier la fonction calculateAngleBetweenLines pour prendre en compte les points de départ et d'arrêt des lignes
+        function calculateAngleBetweenLines(line1, line2) {
+            const vector1 = {
+                x: line1.endX - line1.startX,
+                y: line1.endY - line1.startY
+            };
+
+            const vector2 = {
+                x: line2.endX - line2.startX,
+                y: line2.endY - line2.startY
+            };
+
+            const dotProd = dotProduct(vector1, vector2);
+            const mag1 = magnitude(vector1);
+            const mag2 = magnitude(vector2);
+
+            // Assurez-vous que le produit scalaire est dans la plage valide pour acos
+            const dotClamped = Math.max(-1, Math.min(dotProd / (mag1 * mag2), 1));
+
+            const angleRad = Math.acos(dotClamped);
+
+            // Déterminez le signe de l'angle en fonction du produit vectoriel des vecteurs
+            const crossProduct = vector1.x * vector2.y - vector1.y * vector2.x;
+            const angleDeg = (crossProduct >= 0) ? (angleRad * 180) / Math.PI : -(angleRad * 180) / Math.PI;
+
+            return Math.abs(angleDeg);
+        }
+
+        // Calcul du produit scalaire entre deux vecteurs
+        function dotProduct(vector1, vector2) {
+            return vector1.x * vector2.x + vector1.y * vector2.y;
+        }
+
+        // Calcul de la magnitude (norme) d'un vecteur
+        function magnitude(vector) {
+            return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        }
+
+
 
 
         function drawTangentLine(point, angleRad, color, isOutside) {
