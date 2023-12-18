@@ -324,9 +324,15 @@
             imgElement.src = URL.createObjectURL(file);
 
             imgElement.onload = function () {
+                if (imgElement.width > 390 || imgElement.height > 460) {
+                    alert("Image dimensions should not exceed 390x460 pixels.");
+                    return;
+                }
+
                 loadImageAndProcess(file);
             };
         }
+
 
         function processImage() {
             imgElementOnLoad();
@@ -397,7 +403,7 @@
             // Draw a point on the canvas
             const context = canvas.getContext('2d');
             if (points.length <= 4) {
-                context.fillStyle = 'red';
+                context.fillStyle = 'rgb(255, 0, 0)';;
                 context.beginPath();
                 context.arc(closestPoint.x, closestPoint.y, 5, 0, 2 * Math.PI);
                 context.fill();
