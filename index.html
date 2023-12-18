@@ -31,7 +31,7 @@
             justify-content: space-between;
         }
 
-        #resultContainer {
+        #result-container {
             background-color: #fff;
             border: 1px solid #ddd;
             padding: 20px;
@@ -514,8 +514,9 @@
             // Display the results with the dynamically determined class
             const resultHtml = `<p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
                 <p class="${className}">The second dental taper angle right is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+                <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>
                 <p class="${className}">Angle between lines: <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
-                <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>`;
+                <p>${checkSymmetry()}</p>`;
             resultContainer.innerHTML = resultHtml;
             evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
@@ -608,7 +609,7 @@
         }
 
         function checkSymmetry() {
-            const resultElement = document.getElementById('resultContainer');
+            const resultElement = document.getElementById('result-container');
             const deltaX1 = Math.abs(points[0].x - points[1].x);
             const deltaX2 = Math.abs(points[2].x - points[3].x);
             const deltaY1 = Math.abs(points[0].y - points[1].y);
@@ -616,7 +617,7 @@
 
             const isSymmetrical = Math.abs(deltaX1 - deltaX2) < 5 && Math.abs(deltaY1 - deltaY2) < 5;
 
-            resultElement.textContent += `\nSymmetry: ${isSymmetrical ? "Symmetrical" : "Not Symmetrical"}`;
+            return '\nSymmetry: ' + (isSymmetrical ? "Symmetrical" : "Not Symmetrical");
         }
     </script>
     <!-- Bootstrap JS, Popper.js, and jQuery -->
