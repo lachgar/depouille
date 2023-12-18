@@ -80,7 +80,8 @@
             margin-top: 20px;
             cursor: pointer;
         }
-        #nextButton{
+
+        #nextButton {
             display: none;
         }
     </style>
@@ -442,7 +443,7 @@
                 hideNextButtonIfEmpty();
                 calculateAndDisplayTaperAngles();
                 checkSymmetry();
-                
+
             }
         }
 
@@ -462,7 +463,7 @@
             const deltaY2 = points[3].y - points[2].y;
             const deltaX2 = points[3].x - points[2].x;
             const taperAngleRad2 = Math.atan2(deltaY2, deltaX2);
-            const taperAngleDeg2 = -((taperAngleRad2 * 180) / Math.PI) - 90;
+            const taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
 
             // Calculer les coordonnées du point d'intersection
             const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
@@ -543,13 +544,22 @@
                 className = 'red-text';
             }
 
-            // Display the results with the dynamically determined class
-            const resultHtml = `<p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+             // Create a div element
+            const divElement = document.createElement('div');
+
+            if (points.length === 4) {
+                // Set the inner HTML content with the dynamically determined class
+                divElement.innerHTML = `
+                <p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
                 <p class="${className}">The second dental taper angle is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
                 <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>
                 <p class="${className}">Convergence angle : <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
-                <p>${checkSymmetry()}</p>`;
-            resultContainer.innerHTML = resultHtml;
+                <p>${checkSymmetry()}</p>
+            `;
+            }
+
+            // Append the dynamically created div to a container element (assuming resultContainer is the container)
+            resultContainer.appendChild(divElement);
             evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
 
@@ -670,7 +680,7 @@
             }
         }
 
-        
+
     </script>
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
