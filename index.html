@@ -464,6 +464,9 @@
             const resultElement2 = document.getElementById('result-container2');
             resultElement2.textContent = "";
             hideNextButtonIfEmpty();
+            document.getElementsByClassName('etape3')[0].style.display = 'none';
+            document.getElementsByClassName('etape2')[0].style.display = 'none';
+            document.getElementsByClassName('etape1')[0].style.display = 'inline-block';
         }
 
         function nextAngles() {
