@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();"
         type="text/javascript"></script>
-    <title>Dental Taper Angle and Symmetry Checker</title>
+    <title>Calculateur d'Angles Dentaires : Parois, Versants et Axes</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
@@ -96,18 +96,54 @@
 
         #nextButton {
             width: 100%;
+            display: none;
             /* Make the button take up full width */
+        }
+
+        .etapes-container {
+            text-align: center;
+            margin-top: 10px;
+            /* Ajoute une marge en haut pour l'esthétique */
+        }
+
+        .etape {
+            box-sizing: border-box;
+            padding: 8px;
+            margin: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: inline-block;
+            width: 20%;
+            /* Ajustez la largeur selon vos besoins */
+            text-align: center;
+        }
+
+        .etape1 {
+            background-color: #ffd700;
+            /* Jaune */
+        }
+
+        .etape2 {
+            background-color: #98fb98;
+            display: none;
+            /* Vert clair */
+        }
+
+        .etape3 {
+            background-color: #add8e6;
+            display: none;
+            /* Bleu clair */
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1 class="page-title">Dental Taper Angle and Symmetry Checker</h1>
+        <h1 class="page-title">Calculateur d'Angles Dentaires : Parois, Versants et Axes</h1>
         <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
-            <label for="imageInput" class="btn btn-primary">Upload Image</label>
+            <label for="imageInput" class="btn btn-primary">Charger une image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
-            <button onclick="resetImage()" class="btn btn-danger">Reset</button>
+            <button onclick="resetImage()" class="btn btn-danger">Initialiser</button>
         </div>
     </div>
     <div class="container">
@@ -125,10 +161,24 @@
             </div>
         </div>
     </div>
+    <div class="etapes-container">
+        <div class="etape etape1">
+            <p>Étape 1. Angles de dépouille</p>
+        </div>
+
+        <div class="etape etape2">
+            <p>Étape 2. Versants externes</p>
+        </div>
+
+        <div class="etape etape3">
+            <p>Étape 3. Versants internes</p>
+        </div>
+    </div>
+
+
     <div class="container">
         <div class="btn-container">
-            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Click to measure the Next
-                Angles</button>
+            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Cliquer pour mesurer les angles suivants</button>
         </div>
         <div class="canvas-container">
             <canvas id="originalCanvas" class="border"></canvas>
@@ -434,7 +484,7 @@
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            
+
             // Find the closest point considering both x and y axes
             let closestPoint = null;
             let minDistance = Number.MAX_VALUE;
@@ -483,12 +533,12 @@
             const deltaX = points[1].x - points[0].x;
             const taperAngleRad = Math.atan2(deltaY, deltaX);
             let taperAngleDeg = 0;
-    
+
             if (storPoints.length === 0)
                 taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
             else if (comp === 0)
                 taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
-            else if(comp == 1)
+            else if (comp == 1)
                 taperAngleDeg = (taperAngleRad * 180) / Math.PI;
 
             const deltaY2 = points[3].y - points[2].y;
@@ -500,7 +550,7 @@
                 taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
             else if (comp === 0)
                 taperAngleDeg2 = - (((taperAngleRad2 * 180) / Math.PI) + 90);
-            else if(comp == 1)
+            else if (comp == 1)
                 taperAngleDeg2 = - (taperAngleRad2 * 180) / Math.PI;
 
             // Calculer les coordonnées du point d'intersection
@@ -591,12 +641,15 @@
                     // Set the inner HTML content with the dynamically determined class
                     divElement.innerHTML = `
                     <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
-                    <p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
-                    <p class="${className}">The second dental taper angle is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
-                    <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>
-                    <p class="${className}">Convergence angle : <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
+                    <p class="${className}">Le premier angle de dépouille dentaire est : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Le deuxième angle de dépouille dentaire est : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Angle de convergence : <strong>${angleBetweenLines.toFixed(2)} degrés</strong></p>
                     <p>${checkSymmetry()}</p>
+
                 `;
+                    document.getElementsByClassName('etape1')[0].style.display = 'none';
+                    document.getElementsByClassName('etape2')[0].style.display = 'inline-block';
                     // Append the dynamically created div to a container element (assuming resultContainer is the container)
                     resultContainer.appendChild(divElement);
                 } else {
@@ -610,13 +663,16 @@
                             <p class="${className}">    Vestibulaire 15°/à la verticale : <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
                         `;
                         comp++;
+                        document.getElementsByClassName('etape2')[0].style.display = 'none';
+                        document.getElementsByClassName('etape3')[0].style.display = 'inline-block';
+                    
                     } else {
                         divElement.innerHTML = `
                             <p>Les versants internes : </p>
                             <p class="${className}">    Lingual 15°/à l'horizontal  : <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
                             <p class="${className}">    Vestibulaire à 45 °/à l'horizontal : <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
                         `;
-                        
+
                     }
                     // Append the dynamically created div to a container element (assuming resultContainer is the container)
                     resultContainer2.appendChild(divElement);
@@ -685,11 +741,11 @@
         function evaluateSumOfAngles(sumOfAngles) {
             let res = '';
             if (sumOfAngles >= 6 && sumOfAngles <= 16) {
-                res = 'Perfect taper.';
+                res = 'Excellente performance';
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
-                res = 'Against taper.';
+                res = 'Performance insatisfaisante';
             } else if (sumOfAngles > 16) {
-                res = 'Excessive taper.';
+                res = 'Performance insatisfaisante';
             }
             return res;
         }
