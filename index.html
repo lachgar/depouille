@@ -29,15 +29,27 @@
         #buttons-container {
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+            /* Allow buttons to wrap on smaller screens */
         }
 
-        #result-container {
+        #buttons-container label,
+        #buttons-container input,
+        #buttons-container button {
+            flex: 1;
+            /* Make buttons take up equal width */
+            margin: 5px;
+            /* Add spacing between buttons */
+        }
+
+        #result-container,
+        #result-container2 {
             background-color: #fff;
             border: 1px solid #ddd;
             padding: 20px;
             border-radius: 8px;
-            margin: 20px auto;
-            max-width: 600px;
+            margin: 20px 0;
+            /* Adjust margin for responsiveness */
         }
 
         #resultContainer p {
@@ -55,6 +67,7 @@
             border: 1px solid #3498db;
             cursor: pointer;
             background-color: #fff;
+
         }
 
         .green-text {
@@ -82,7 +95,8 @@
         }
 
         #nextButton {
-            display: none;
+            width: 100%;
+            /* Make the button take up full width */
         }
     </style>
 </head>
@@ -90,19 +104,32 @@
 <body>
     <div class="container">
         <h1 class="page-title">Dental Taper Angle and Symmetry Checker</h1>
-        <div id="buttons-container" class="d-flex justify-content-between">
+        <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
             <label for="imageInput" class="btn btn-primary">Upload Image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
-            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Next</button>
             <button onclick="resetImage()" class="btn btn-danger">Reset</button>
         </div>
     </div>
     <div class="container">
-        <div id="result-container">
-            <div id="resultContainer"></div>
+        <div class="row">
+            <div id="resultContainer" class="col-md-6">
+                <!-- Adjust column size based on your layout -->
+            </div>
+        </div>
+        <div class="row">
+            <div id="result-container" class="col-md-6">
+                <!-- Adjust column size based on your layout -->
+            </div>
+            <div id="result-container2" class="col-md-6">
+                <!-- Adjust column size based on your layout -->
+            </div>
         </div>
     </div>
     <div class="container">
+        <div class="btn-container">
+            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Click to measure the Next
+                Angles</button>
+        </div>
         <div class="canvas-container">
             <canvas id="originalCanvas" class="border"></canvas>
             <canvas id="canvas" onclick="handleCanvasClick(event)" class="border"></canvas>
@@ -118,6 +145,7 @@
         let linesDrawn = false;
         let storPoints = [];
         let storAngles = [];
+        let comp = 0;
 
         function onOpenCvReady() {
             isOpencvReady = true;
@@ -285,14 +313,12 @@
             });
         }
 
-
         function drawPoint(context, point, radius, color) {
             context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
             context.beginPath();
             context.arc(point.x, point.y, radius, 0, 2 * Math.PI);
             context.fill();
         }
-
 
         // Function to check if a point is on a line
         function checkIfPointOnLine(x, y, lines) {
@@ -327,7 +353,6 @@
                 alert("Please select an image.");
                 return;
             }
-
             imgElement = new Image();
             imgElement.src = URL.createObjectURL(file);
 
@@ -336,11 +361,9 @@
                     alert("Image dimensions should not exceed 1000x1000 pixels.");
                     return;
                 }
-
                 loadImageAndProcess(file);
             };
         }
-
 
         function processImage() {
             imgElementOnLoad();
@@ -366,6 +389,9 @@
         function resetImage() {
             points = [];
             angles = [];
+            storPoints = [];
+            storAngles = [];
+            comp = 0;
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
@@ -373,9 +399,10 @@
             loadImageAndProcess();
             const resultElement = document.getElementById('result-container');
             resultElement.textContent = "";
+            const resultElement2 = document.getElementById('result-container2');
+            resultElement2.textContent = "";
             hideNextButtonIfEmpty();
         }
-
 
         function nextAngles() {
             storPoints = points;
@@ -394,14 +421,11 @@
         function highlightCorners(src, dilated) {
             const corners = new cv.Mat();
             cv.goodFeaturesToTrack(dilated, corners, 100, 0.01, 10);
-
             for (let i = 0; i < corners.rows; ++i) {
                 const point = new cv.Point(corners.data32F[i * 2], corners.data32F[i * 2 + 1]);
                 cv.circle(src, point, 1, [0, 255, 0, 255], -1); // Highlight corners in green
             }
-
             cv.imshow('originalCanvas', src);
-
             corners.delete();
         }
 
@@ -410,7 +434,7 @@
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-
+            
             // Find the closest point considering both x and y axes
             let closestPoint = null;
             let minDistance = Number.MAX_VALUE;
@@ -458,12 +482,26 @@
             const deltaY = points[1].y - points[0].y;
             const deltaX = points[1].x - points[0].x;
             const taperAngleRad = Math.atan2(deltaY, deltaX);
-            const taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
+            let taperAngleDeg = 0;
+    
+            if (storPoints.length === 0)
+                taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
+            else if (comp === 0)
+                taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
+            else if(comp == 1)
+                taperAngleDeg = (taperAngleRad * 180) / Math.PI;
 
             const deltaY2 = points[3].y - points[2].y;
             const deltaX2 = points[3].x - points[2].x;
             const taperAngleRad2 = Math.atan2(deltaY2, deltaX2);
-            const taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
+
+            let taperAngleDeg2 = 0;
+            if (storPoints.length === 0)
+                taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
+            else if (comp === 0)
+                taperAngleDeg2 = - (((taperAngleRad2 * 180) / Math.PI) + 90);
+            else if(comp == 1)
+                taperAngleDeg2 = - (taperAngleRad2 * 180) / Math.PI;
 
             // Calculer les coordonnées du point d'intersection
             const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
@@ -544,23 +582,46 @@
                 className = 'red-text';
             }
 
-             // Create a div element
-            const divElement = document.createElement('div');
-
             if (points.length === 4) {
-                // Set the inner HTML content with the dynamically determined class
-                divElement.innerHTML = `
-                <p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
-                <p class="${className}">The second dental taper angle is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
-                <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>
-                <p class="${className}">Convergence angle : <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
-                <p>${checkSymmetry()}</p>
-            `;
+                storPoints.push(points);
+                storAngles.push(angles);
+                if (storPoints.length === 1) {
+                    // Create a div element
+                    const divElement = document.createElement('div');
+                    // Set the inner HTML content with the dynamically determined class
+                    divElement.innerHTML = `
+                    <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
+                    <p class="${className}">The first dental taper angle is: <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+                    <p class="${className}">The second dental taper angle is: <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+                    <p class="${className}">Sum of angles: <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrees</strong></p>
+                    <p class="${className}">Convergence angle : <strong>${angleBetweenLines.toFixed(2)} degrees</strong></p>
+                    <p>${checkSymmetry()}</p>
+                `;
+                    // Append the dynamically created div to a container element (assuming resultContainer is the container)
+                    resultContainer.appendChild(divElement);
+                } else {
+                    const resultContainer2 = document.getElementById('result-container2');
+                    // Create a div element
+                    const divElement = document.createElement('div');
+                    if (comp === 0) {
+                        divElement.innerHTML = `
+                            <p>Les versants externes : </p>
+                            <p class="${className}">    Lingual 45°/à la verticale  : <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+                            <p class="${className}">    Vestibulaire 15°/à la verticale : <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+                        `;
+                        comp++;
+                    } else {
+                        divElement.innerHTML = `
+                            <p>Les versants internes : </p>
+                            <p class="${className}">    Lingual 15°/à l'horizontal  : <strong>${taperAngleDeg.toFixed(2)} degrees</strong></p>
+                            <p class="${className}">    Vestibulaire à 45 °/à l'horizontal : <strong>${taperAngleDeg2.toFixed(2)} degrees</strong></p>
+                        `;
+                        
+                    }
+                    // Append the dynamically created div to a container element (assuming resultContainer is the container)
+                    resultContainer2.appendChild(divElement);
+                }
             }
-
-            // Append the dynamically created div to a container element (assuming resultContainer is the container)
-            resultContainer.appendChild(divElement);
-            evaluateSumOfAngles(sumOfFirstAndLastAngles);
         }
 
         // Modifier la fonction calculateAngleBetweenLines pour prendre en compte les points de départ et d'arrêt des lignes
@@ -601,9 +662,6 @@
             return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
         }
 
-
-
-
         function drawTangentLine(point, angleRad, color, isOutside) {
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
@@ -624,30 +682,16 @@
             context.stroke();
         }
 
-
         function evaluateSumOfAngles(sumOfAngles) {
-            const resultElement = document.getElementById('resultContainer');
+            let res = '';
             if (sumOfAngles >= 6 && sumOfAngles <= 16) {
-                resultElement.textContent += '\nPerfect taper.';
+                res = 'Perfect taper.';
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
-                resultElement.textContent += '\nAgainst taper.';
+                res = 'Against taper.';
             } else if (sumOfAngles > 16) {
-                resultElement.textContent += '\nExcessive taper.';
+                res = 'Excessive taper.';
             }
-        }
-
-
-
-
-        function evaluateSumOfAngles(sumOfAngles) {
-            const resultElement = document.getElementById('resultContainer');
-            if (sumOfAngles >= 6 && sumOfAngles <= 16) {
-                resultElement.textContent += '\nPerfect taper.';
-            } else if (sumOfAngles > 0 && sumOfAngles < 6) {
-                resultElement.textContent += '\nAgainst taper.';
-            } else if (sumOfAngles > 16) {
-                resultElement.textContent += '\nExcessive taper.';
-            }
+            return res;
         }
 
         function checkSymmetry() {
