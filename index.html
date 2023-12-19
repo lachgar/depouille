@@ -113,13 +113,18 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             display: inline-block;
-            width: 20%;
+            width: 30%;
             /* Ajustez la largeur selon vos besoins */
             text-align: center;
         }
 
+        .etape0 {
+            background-color: #add8e6;
+            /* Jaune */
+        }
         .etape1 {
             background-color: #ffd700;
+            display: none;
             /* Jaune */
         }
 
@@ -162,16 +167,20 @@
         </div>
     </div>
     <div class="etapes-container">
+        <div class="etape etape0">
+            <p>Étape 1. Charger une image</p>
+        </div>
+
         <div class="etape etape1">
-            <p>Étape 1. Angles de dépouille</p>
+            <p>Étape 2. Angles de dépouille (G-D)</p>
         </div>
 
         <div class="etape etape2">
-            <p>Étape 2. Versants externes</p>
+            <p>Étape 3. Versants externes (G-D) </p>
         </div>
 
         <div class="etape etape3">
-            <p>Étape 3. Versants internes</p>
+            <p>Étape 4. Versants internes (G-D)</p>
         </div>
     </div>
 
@@ -417,6 +426,9 @@
 
         function processImage() {
             imgElementOnLoad();
+            document.getElementsByClassName('etape0')[0].style.display = 'none';
+            document.getElementsByClassName('etape1')[0].style.display = 'inline-block';
+                    
         }
 
         function resetCanvasFromOriginal() {
@@ -759,10 +771,10 @@
 
             const isSymmetrical = Math.abs(deltaX1 - deltaX2) < 5 && Math.abs(deltaY1 - deltaY2) < 5;
 
-            return '\nSymmetry: ' + (isSymmetrical ? "Symmetrical" : "Not Symmetrical");
+            return '\nSymétrie: ' + (isSymmetrical ? "Symétrique" : "Non Symétrique");
         }
 
-
+        
         //Bouton next  
 
         // Vérifie si le tableau storPoints est vide
