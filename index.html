@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();"
         type="text/javascript"></script>
-    <title>Calculateur d'Angles Dentaires : Parois, Versants et Axes</title>
+    <title>My Prep</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
@@ -177,7 +177,7 @@
     <header>
         <div class="container-logo">
             <img src="images/fmd.png" alt="Logo 1" class="logo">
-            <h1 class="page-title">Calculateur d'Angles Dentaires : Parois, Versants et Axes</h1>
+            <h1 class="page-title">My Prep</h1>
             <img src="images/ensaj.jpg" alt="Logo 2" class="logo">
         </div>
     </header>
@@ -448,10 +448,10 @@
             imgElement.src = URL.createObjectURL(file);
 
             imgElement.onload = function () {
-                if (imgElement.width > 1000 || imgElement.height > 1000) {
-                    alert("Image dimensions should not exceed 1000x1000 pixels.");
-                    return;
-                }
+               // if (imgElement.width > 1000 || imgElement.height > 1000) {
+                //    alert("Image dimensions should not exceed 1000x1000 pixels.");
+                //    return;
+               // }
                 loadImageAndProcess(file);
             };
         }
