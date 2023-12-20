@@ -243,7 +243,31 @@
         }
 
         function loadImageAndProcess(file) {
+            const originalCanvas = document.getElementById('originalCanvas');
+            const contextOriginal = originalCanvas.getContext('2d');
+            // Resize the image if dimensions exceed 1000x1000 pixels
+            if (imgElement.width > 1000 || imgElement.height > 1000) {
+                var scaleFactor = Math.min(1000 / imgElement.width, 1000 / imgElement.height);
+
+                // Calculate the new dimensions while maintaining the aspect ratio
+                var newWidth = imgElement.width * scaleFactor;
+                var newHeight = imgElement.height * scaleFactor;
+
+                // Create a temporary canvas to draw the resized image
+                var tempCanvas = document.createElement('canvas');
+                var tempContext = tempCanvas.getContext('2d');
+                tempCanvas.width = newWidth;
+                tempCanvas.height = newHeight;
+                tempContext.drawImage(imgElement, 0, 0, newWidth, newHeight);
+
+                // Update the imgElement with the resized image
+                imgElement.src = tempCanvas.toDataURL('image/jpeg'); // You can use 'image/png' if you prefer PNG
+            }
+
+            // Rest of the function remains unchanged...
             originalImage = cv.imread(imgElement);
+
+            //originalImage = cv.imread(imgElement);
             const edges = new cv.Mat();
             const lines = new cv.Mat();
 
@@ -269,8 +293,6 @@
             cv.HoughLines(dilated, lines, 1, Math.PI / 180, 100);
 
             // Display the original image
-            const originalCanvas = document.getElementById('originalCanvas');
-            const contextOriginal = originalCanvas.getContext('2d');
             originalCanvas.width = imgElement.width;
             originalCanvas.height = imgElement.height;
             contextOriginal.drawImage(imgElement, 0, 0, originalCanvas.width, originalCanvas.height);
@@ -448,10 +470,10 @@
             imgElement.src = URL.createObjectURL(file);
 
             imgElement.onload = function () {
-               // if (imgElement.width > 1000 || imgElement.height > 1000) {
-                //    alert("Image dimensions should not exceed 1000x1000 pixels.");
-                //    return;
-               // }
+                //if (imgElement.width > 1000 || imgElement.height > 1000) {
+                //   alert("Image dimensions should not exceed 1000x1000 pixels.");
+                //   return;
+                //}
                 loadImageAndProcess(file);
             };
         }
@@ -712,12 +734,12 @@
                         resultContainer.appendChild(divElement);
                     } else {
                         let etat = '';
-                        if(sumOfFirstAndLastAngles.toFixed(2) !== angleBetweenLines.toFixed(2)){
-                            etat  = 'Contre depouille';
+                        if (sumOfFirstAndLastAngles.toFixed(2) !== angleBetweenLines.toFixed(2)) {
+                            etat = 'Contre depouille';
                         }
                         const resultContainer2 = document.getElementById('result-container2');
                         divElement.innerHTML = `
-                        <p class="${className}"><strong>${etat?etat:''}</strong></p>
+                        <p class="${className}"><strong>${etat ? etat : ''}</strong></p>
 
                     <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
                     <p class="${className}">Dépouille des parois vestibulo-linguales : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
