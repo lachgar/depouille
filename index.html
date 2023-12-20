@@ -735,7 +735,7 @@
                     } else {
                         let etat = '';
                         if (sumOfFirstAndLastAngles.toFixed(2) !== angleBetweenLines.toFixed(2)) {
-                            etat = 'Contre depouille';
+                            etat = 'Contre dépouille';
                         }
                         const resultContainer2 = document.getElementById('result-container2');
                         divElement.innerHTML = `
@@ -745,7 +745,7 @@
                     <p class="${className}">Dépouille des parois vestibulo-linguales : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
                     <p class="${className}">Dépouille des parois mésio-distale : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
                     <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Angle de convergence : <strong>${angleBetweenLines.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Angle de convergence : <strong>${etat? 'Pas de convergence':angleBetweenLines.toFixed(2)+' degrés'} </strong></p>
                     <p>${checkSymmetry()}</p>
                 `;
                         // Append the dynamically created div to a container element (assuming resultContainer is the container)
@@ -821,7 +821,7 @@
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
                 res = 'Performance insatisfaisante';
             } else if (sumOfAngles > 16) {
-                res = 'Performance insatisfaisante';
+                res = 'Performance insatisfaisante : Dépouille excessive';
             } else {
                 res = 'Médiocre';
             }
@@ -839,9 +839,6 @@
 
             return '\nSymétrie: ' + (isSymmetrical ? "Symétrique" : "Non Symétrique");
         }
-
-
-        //Bouton next  
 
         // Vérifie si le tableau storPoints est vide
         function isStorPointsEmpty() {
