@@ -11,35 +11,53 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f7f7f7;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        header {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .container-logo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            max-width: 20%;
+            width: 10%;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #ecf0f1;
         }
 
         .container {
             margin-top: 30px;
         }
 
-        .page-title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #3498db;
-        }
-
         #buttons-container {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            /* Allow buttons to wrap on smaller screens */
         }
 
         #buttons-container label,
         #buttons-container input,
         #buttons-container button {
             flex: 1;
-            /* Make buttons take up equal width */
             margin: 5px;
-            /* Add spacing between buttons */
         }
 
         #result-container,
@@ -49,7 +67,6 @@
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
-            /* Adjust margin for responsiveness */
         }
 
         #resultContainer p {
@@ -64,22 +81,21 @@
         }
 
         canvas {
-            border: 1px solid #3498db;
+            border: 1px solid #34495e;
             cursor: pointer;
             background-color: #fff;
-
         }
 
         .green-text {
-            color: green;
+            color: #27ae60;
         }
 
         .orange-text {
-            color: orange;
+            color: #e67e22;
         }
 
         .red-text {
-            color: red;
+            color: #e74c3c;
         }
 
         input[type="file"],
@@ -97,13 +113,11 @@
         #nextButton {
             width: 100%;
             display: none;
-            /* Make the button take up full width */
         }
 
         .etapes-container {
             text-align: center;
             margin-top: 10px;
-            /* Ajoute une marge en haut pour l'esthétique */
         }
 
         .etape {
@@ -114,37 +128,60 @@
             border-radius: 5px;
             display: inline-block;
             width: 30%;
-            /* Ajustez la largeur selon vos besoins */
             text-align: center;
+            margin-bottom: 10px;
         }
 
         .etape0 {
-            background-color: #add8e6;
-            /* Jaune */
+            background-color: #3498db;
+            color: #ecf0f1;
         }
+
         .etape1 {
-            background-color: #ffd700;
+            background-color: #2980b9;
+            color: #ecf0f1;
             display: none;
-            /* Jaune */
         }
 
         .etape2 {
-            background-color: #98fb98;
+            background-color: #e67e22;
+            color: #ecf0f1;
             display: none;
-            /* Vert clair */
         }
 
         .etape3 {
-            background-color: #add8e6;
+            background-color: #3498db;
+            color: #ecf0f1;
             display: none;
-            /* Bleu clair */
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        .canvas-container {
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
+    <header>
+        <div class="container-logo">
+            <img src="images/fmd.png" alt="Logo 1" class="logo">
+            <h1 class="page-title">Calculateur d'Angles Dentaires : Parois, Versants et Axes</h1>
+            <img src="images/ensaj.jpg" alt="Logo 2" class="logo">
+        </div>
+    </header>
     <div class="container">
-        <h1 class="page-title">Calculateur d'Angles Dentaires : Parois, Versants et Axes</h1>
         <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
             <label for="imageInput" class="btn btn-primary">Charger une image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
@@ -153,46 +190,41 @@
     </div>
     <div class="container">
         <div class="row">
-            <div id="resultContainer" class="col-md-6">
-                <!-- Adjust column size based on your layout -->
-            </div>
+            <div id="resultContainer" class="col-md-6"></div>
         </div>
         <div class="row">
-            <div id="result-container" class="col-md-6">
-                <!-- Adjust column size based on your layout -->
-            </div>
-            <div id="result-container2" class="col-md-6">
-                <!-- Adjust column size based on your layout -->
-            </div>
+            <div id="result-container" class="col-md-6"></div>
+            <div id="result-container2" class="col-md-6"></div>
         </div>
     </div>
     <div class="etapes-container">
         <div class="etape etape0">
             <p>Étape 1. Charger une image</p>
         </div>
-
         <div class="etape etape1">
-            <p>Étape 2. Angles de dépouille (G-D)</p>
+            <p>Étape 2. Versants internes (G-D) </p>
         </div>
-
         <div class="etape etape2">
             <p>Étape 3. Versants externes (G-D) </p>
         </div>
-
         <div class="etape etape3">
-            <p>Étape 4. Versants internes (G-D)</p>
+            <p>Étape 4. Angles de dépouille (G-D) </p>
         </div>
     </div>
-
-
     <div class="container">
         <div class="btn-container">
-            <button id="nextButton" onclick="nextAngles()" class="btn btn-success">Cliquer pour mesurer les angles suivants</button>
+            <button id="nextButton" onclick="nextAngles()" class="btn btn-info">Cliquer pour mesurer les angles
+                suivants</button>
         </div>
         <div class="canvas-container">
             <canvas id="originalCanvas" class="border"></canvas>
             <canvas id="canvas" onclick="handleCanvasClick(event)" class="border"></canvas>
         </div>
+    </div>
+    <div class="footer">
+        <p>Le projet est réalisé en partenariat entre l'École Nationale des Sciences Appliquées d'El Jadida et la
+            Faculté de Médecine Dentaire de Casablanca.</p>
+        <p>© 2023. Tous droits réservés.</p>
     </div>
 
     <script>
@@ -428,7 +460,7 @@
             imgElementOnLoad();
             document.getElementsByClassName('etape0')[0].style.display = 'none';
             document.getElementsByClassName('etape1')[0].style.display = 'inline-block';
-                    
+
         }
 
         function resetCanvasFromOriginal() {
@@ -550,11 +582,12 @@
             let taperAngleDeg = 0;
 
             if (storPoints.length === 0)
-                taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
+
+                taperAngleDeg = (taperAngleRad * 180) / Math.PI;
             else if (comp === 0)
                 taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
             else if (comp == 1)
-                taperAngleDeg = (taperAngleRad * 180) / Math.PI;
+                taperAngleDeg = 90 + (taperAngleRad * 180) / Math.PI;
 
             const deltaY2 = points[3].y - points[2].y;
             const deltaX2 = points[3].x - points[2].x;
@@ -562,11 +595,12 @@
 
             let taperAngleDeg2 = 0;
             if (storPoints.length === 0)
-                taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
+                taperAngleDeg2 = - (taperAngleRad2 * 180) / Math.PI;
             else if (comp === 0)
                 taperAngleDeg2 = - (((taperAngleRad2 * 180) / Math.PI) + 90);
             else if (comp == 1)
-                taperAngleDeg2 = - (taperAngleRad2 * 180) / Math.PI;
+                taperAngleDeg2 = -(((taperAngleRad2 * 180) / Math.PI) + 90);
+
 
             // Calculer les coordonnées du point d'intersection
             const slope1 = (points[1].y - points[0].y) / (points[1].x - points[0].x);
@@ -577,7 +611,6 @@
 
             const intersectionX = (yIntercept2 - yIntercept1) / (slope1 - slope2);
             const intersectionY = slope1 * intersectionX + yIntercept1;
-
 
             const line1 = {
                 startX: points[0].x,
@@ -655,20 +688,16 @@
                     const divElement = document.createElement('div');
                     // Set the inner HTML content with the dynamically determined class
                     divElement.innerHTML = `
-                    <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
-                    <p class="${className}">Le premier angle de dépouille dentaire est : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Le deuxième angle de dépouille dentaire est : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Angle de convergence : <strong>${angleBetweenLines.toFixed(2)} degrés</strong></p>
-                    <p>${checkSymmetry()}</p>
-
-                `;
+                            <p>Les versants internes : </p>
+                            <p class="${className}">    Lingual 15°/à l'horizontal  : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
+                            <p class="${className}">    Vestibulaire à 45 °/à l'horizontal : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
+                        `;
                     document.getElementsByClassName('etape1')[0].style.display = 'none';
                     document.getElementsByClassName('etape2')[0].style.display = 'inline-block';
                     // Append the dynamically created div to a container element (assuming resultContainer is the container)
                     resultContainer.appendChild(divElement);
                 } else {
-                    const resultContainer2 = document.getElementById('result-container2');
+
                     // Create a div element
                     const divElement = document.createElement('div');
                     if (comp === 0) {
@@ -680,17 +709,27 @@
                         comp++;
                         document.getElementsByClassName('etape2')[0].style.display = 'none';
                         document.getElementsByClassName('etape3')[0].style.display = 'inline-block';
-                    
+                        resultContainer.appendChild(divElement);
                     } else {
+                        let etat = '';
+                        if(sumOfFirstAndLastAngles.toFixed(2) !== angleBetweenLines.toFixed(2)){
+                            etat  = 'Contre depouille';
+                        }
+                        const resultContainer2 = document.getElementById('result-container2');
                         divElement.innerHTML = `
-                            <p>Les versants internes : </p>
-                            <p class="${className}">    Lingual 15°/à l'horizontal  : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
-                            <p class="${className}">    Vestibulaire à 45 °/à l'horizontal : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
-                        `;
+                        <p class="${className}"><strong>${etat?etat:''}</strong></p>
 
+                    <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
+                    <p class="${className}">Dépouille des parois vestibulo-linguales : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Dépouille des parois mésio-distale : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
+                    <p class="${className}">Angle de convergence : <strong>${angleBetweenLines.toFixed(2)} degrés</strong></p>
+                    <p>${checkSymmetry()}</p>
+                `;
+                        // Append the dynamically created div to a container element (assuming resultContainer is the container)
+                        resultContainer2.appendChild(divElement);
                     }
-                    // Append the dynamically created div to a container element (assuming resultContainer is the container)
-                    resultContainer2.appendChild(divElement);
+
                 }
             }
         }
@@ -761,6 +800,8 @@
                 res = 'Performance insatisfaisante';
             } else if (sumOfAngles > 16) {
                 res = 'Performance insatisfaisante';
+            } else {
+                res = 'Médiocre';
             }
             return res;
         }
@@ -777,7 +818,7 @@
             return '\nSymétrie: ' + (isSymmetrical ? "Symétrique" : "Non Symétrique");
         }
 
-        
+
         //Bouton next  
 
         // Vérifie si le tableau storPoints est vide
@@ -795,9 +836,7 @@
             }
         }
 
-
     </script>
-    <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -807,7 +846,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
-
 </body>
 
 </html>
