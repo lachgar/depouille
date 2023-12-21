@@ -236,14 +236,14 @@
         <!-- Icône démo -->
         <div class="icon2" onclick="openPopup2()">
             <!-- Remplacez "votre_icone2.png" par le chemin de votre icône -->
-            <img src="images/demo.png" style="width: 4%;" alt="Icon2">
+            <img src="images/demo.png" style="width: 6%;" alt="Icon2">
         </div>
         <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
             <label for="imageInput" class="btn btn-primary">Charger une image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
             <button onclick="resetImage()" class="btn btn-danger">Initialiser</button>
         </div>
-        
+
     </div>
     <div class="container">
         <div class="row">
@@ -292,23 +292,27 @@
     </div>
     <!-- Popup du second popup -->
     <div id="popup2" class="popup2">
+        <!-- Bouton pour fermer le second popup -->
+        <div style="text-align: right; margin-top: 10px;">
+            <span onclick="closePopup2()" style="cursor: pointer;">
+                <!-- Utilisez une icône de fermeture, par exemple, "X" -->
+                &#10006;
+            </span>
+        </div>
         <!-- Vidéo 1 -->
-        Démo 1 
-        <video width="100%" controls>
+        Démo 1
+        <video id="video1" width="100%" controls onclick="toggleFullScreen('video1')">
             <source src="videos/demo1.webm" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
         Démo 2
-        <video width="100%" controls>
+        <video id="video2" width="100%" controls onclick="toggleFullScreen('video2')">
             <source src="videos/demo3.webm" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
-        <!-- Bouton pour fermer le second popup -->
-        <div style="text-align: right; margin-top: 10px;">
-            <span onclick="closePopup2()" style="cursor: pointer;">Fermer</span>
-        </div>
+
     </div>
     <div class="footer">
         <p>Le projet est réalisé en partenariat entre l'École Nationale des Sciences Appliquées d'El Jadida et la
@@ -910,7 +914,7 @@
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
                 res = 'Performance insatisfaisante';
             } else if (sumOfAngles > 16) {
-                res = 'Performance insatisfaisante : Dépouille excessive'+' <img src="images/search.png" alt="Icon" onclick="openPopup()" style="width:6%">';
+                res = 'Performance insatisfaisante : Dépouille excessive' + ' <img src="images/search.png" alt="Icon" onclick="openPopup()" style="width:6%">';
             } else {
                 res = 'Médiocre';
             }
@@ -962,6 +966,20 @@
         // Fonction pour fermer le second popup
         function closePopup2() {
             document.getElementById('popup2').style.display = 'none';
+        }
+
+        // Ajout de la fonction pour activer le mode plein écran pour la vidéo
+        function toggleFullScreen(videoId) {
+            var video = document.getElementById(videoId);
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) {
+                video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
         }
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
