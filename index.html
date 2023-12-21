@@ -170,6 +170,56 @@
             margin-top: 20px;
             text-align: center;
         }
+
+        /* Styles pour le popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-height: 80vh;
+            /* Limite la hauteur à 80% de la hauteur de l'écran */
+            overflow-y: auto;
+            /* Ajoute une barre de défilement si nécessaire */
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        /* Styles pour l'icône */
+        .icon {
+            cursor: pointer;
+        }
+
+        /* Styles pour le second popup */
+        .popup2 {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-height: 80vh;
+            max-width: 80vw;
+            overflow: auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            /* Utilisez un z-index différent */
+            text-align: center;
+            /* Ajout de la propriété pour centrer le contenu */
+        }
+
+        /* Styles pour l'icône du second popup */
+        .icon2 {
+            cursor: pointer;
+            margin: auto;
+            /* Ajout de la propriété pour centrer l'icône */
+        }
     </style>
 </head>
 
@@ -181,12 +231,19 @@
             <img src="images/ensaj.jpg" alt="Logo 2" class="logo">
         </div>
     </header>
+
     <div class="container">
+        <!-- Icône démo -->
+        <div class="icon2" onclick="openPopup2()">
+            <!-- Remplacez "votre_icone2.png" par le chemin de votre icône -->
+            <img src="images/demo.png" style="width: 4%;" alt="Icon2">
+        </div>
         <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
             <label for="imageInput" class="btn btn-primary">Charger une image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
             <button onclick="resetImage()" class="btn btn-danger">Initialiser</button>
         </div>
+        
     </div>
     <div class="container">
         <div class="row">
@@ -217,8 +274,47 @@
                 suivants</button>
         </div>
         <div class="canvas-container">
-            <canvas id="originalCanvas" class="border"></canvas>
             <canvas id="canvas" onclick="handleCanvasClick(event)" class="border"></canvas>
+            <canvas id="originalCanvas" class="border"></canvas>
+        </div>
+    </div>
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <!-- Galerie d'images -->
+        <img src="images/schema1.png" alt="Image 1" style="width:100%">
+        <img src="images/schema2.png" alt="Image 2" style="width:100%">
+        <img src="images/schema3.png" alt="Image 3" style="width:100%">
+
+        <!-- Bouton pour fermer le popup -->
+        <div style="text-align: right; margin-top: 10px;">
+            <span onclick="closePopup()" style="cursor: pointer;">Fermer</span>
+        </div>
+    </div>
+    <!-- Popup du second popup -->
+    <div id="popup2" class="popup2">
+        <!-- Vidéo 1 -->
+        Démo 1 
+        <video width="100%" controls>
+            <source src="videos/demo1.webm" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Vidéo 2 -->
+        Démo 2
+        <video width="100%" controls style="margin-top: 10px;">
+            <source src="videos/demo2.webm" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        Démo 3  
+        <video width="100%" controls>
+            <source src="videos/demo3.webm" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Bouton pour fermer le second popup -->
+        <div style="text-align: right; margin-top: 10px;">
+            <span onclick="closePopup2()" style="cursor: pointer;">Fermer</span>
         </div>
     </div>
     <div class="footer">
@@ -686,7 +782,8 @@
             const centerY3 = (intersectionY + centerY2) / 2;
 
             context.fillStyle = 'blue';
-            context.fillText(`Convergence Angle: ${angleBetweenLines.toFixed(2)} °`, centerX3 - 40, centerY3 + 20);
+            if (comp !== 0)
+                context.fillText(`Convergence Angle: ${angleBetweenLines.toFixed(2)} °`, centerX3 - 40, centerY3 + 20);
 
             const sumOfFirstAndLastAngles = taperAngleDeg + taperAngleDeg2;
 
@@ -739,15 +836,14 @@
                         }
                         const resultContainer2 = document.getElementById('result-container2');
                         divElement.innerHTML = `
-                        <p class="${className}"><strong>${etat ? etat : ''}</strong></p>
-
-                    <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
-                    <p class="${className}">Dépouille des parois vestibulo-linguales : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Dépouille des parois mésio-distale : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
-                    <p class="${className}">Angle de convergence : <strong>${etat? 'Pas de convergence':angleBetweenLines.toFixed(2)+' degrés'} </strong></p>
-                    <p>${checkSymmetry()}</p>
-                `;
+                        <p class="${className}"><strong>${etat ? etat + ': <img src="images/search.png" alt="Icon" onclick="openPopup()" style="width:6%">' : ''}</strong></p>
+                        <p class="${className}"><strong>${evaluateSumOfAngles(sumOfFirstAndLastAngles)}</strong></p>
+                        <p class="${className}">Dépouille des parois vestibulo-linguales : <strong>${taperAngleDeg.toFixed(2)} degrés</strong></p>
+                        <p class="${className}">Dépouille des parois mésio-distale : <strong>${taperAngleDeg2.toFixed(2)} degrés</strong></p>
+                        <p class="${className}">Somme des angles : <strong>${sumOfFirstAndLastAngles.toFixed(2)} degrés</strong></p>
+                        <p class="${className}">Angle de convergence : <strong>${etat ? 'Pas de convergence' : angleBetweenLines.toFixed(2) + ' degrés'} </strong></p>
+                        <p>${checkSymmetry()}</p>
+                    `;
                         // Append the dynamically created div to a container element (assuming resultContainer is the container)
                         resultContainer2.appendChild(divElement);
                     }
@@ -821,7 +917,7 @@
             } else if (sumOfAngles > 0 && sumOfAngles < 6) {
                 res = 'Performance insatisfaisante';
             } else if (sumOfAngles > 16) {
-                res = 'Performance insatisfaisante : Dépouille excessive';
+                res = 'Performance insatisfaisante : Dépouille excessive'+' <img src="images/search.png" alt="Icon" onclick="openPopup()" style="width:6%">';
             } else {
                 res = 'Médiocre';
             }
@@ -855,6 +951,25 @@
             }
         }
 
+        // Fonction pour ouvrir le popup
+        function openPopup() {
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        // Fonction pour fermer le popup
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        // Fonction pour ouvrir le second popup
+        function openPopup2() {
+            document.getElementById('popup2').style.display = 'block';
+        }
+
+        // Fonction pour fermer le second popup
+        function closePopup2() {
+            document.getElementById('popup2').style.display = 'none';
+        }
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
