@@ -230,14 +230,19 @@
             <h1 class="page-title">My Prep</h1>
            <!--  <img src="images/ensaj.jpg" alt="Logo 2" class="logo"> -->
         </div>
+        
     </header>
-
+    
     <div class="container">
         <!-- Icône démo -->
-        <div class="icon2" onclick="openPopup2()">
+        <div class="icon2" >
             <!-- Remplacez "votre_icone2.png" par le chemin de votre icône -->
-            <img src="images/demo.png" style="width: 6%;" alt="Icon2">
+            <img src="images/demo.png" style="width: 6%;" alt="Icon2" onclick="openPopup2()">
+            <a href="apps/app-release.apk" download>
+                <img src="images/android.png" style="width: 6%;" alt="Icon2">
+            </a>
         </div>
+        
         <div id="buttons-container" class="d-flex justify-content-between flex-wrap">
             <label for="imageInput" class="btn btn-primary">Charger une image</label>
             <input type="file" id="imageInput" accept="image/*" onchange="processImage()" style="display: none;">
